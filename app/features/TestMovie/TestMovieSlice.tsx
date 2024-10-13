@@ -1,6 +1,6 @@
 import { Movie } from '@/app/model/Movie';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { addMovie, deleteMovie, getAllMovies, getMovieById, updateMovie, updateMovieStatus } from './testMovieFirebaseService';
+import { addMovie, deleteMovie, getAllMovies, getMovieById, getMoviesByStatus, updateMovie, updateMovieStatus } from './testMovieFirebaseService';
 
 // Khởi tạo state ban đầu
 interface MovieState {
@@ -94,6 +94,20 @@ export const updateMovieStatusById = createAsyncThunk(
         try {
             await updateMovieStatus(movieId, newStatus); // Gọi hàm cập nhật trạng thái
             return { movieId, newStatus }; // Trả về thông tin sau khi cập nhật thành công
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+
+// Async Thunk để lấy Movies theo Status
+export const fetchMoviesByStatus = createAsyncThunk(
+    'movie/fetchMoviesByStatus',
+    async (status: string, { rejectWithValue }) => {
+        try {
+            const movies = await getMoviesByStatus(status); // Sử dụng hàm getMoviesByStatus đã viết
+            return movies; // Trả về danh sách movies theo status
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -198,6 +212,20 @@ const movieSlice = createSlice({
             state.loading = false;
             state.error = action.payload as string;
         });
+        // Lấy Movies theo Status
+        builder.addCase(fetchMoviesByStatus.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        builder.addCase(fetchMoviesByStatus.fulfilled, (state, action) => {
+            state.loading = false;
+            state.movies = action.payload; // Cập nhật danh sách movies theo status
+        });
+        builder.addCase(fetchMoviesByStatus.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        });
+
     },
 });
 

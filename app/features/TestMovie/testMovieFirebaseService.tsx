@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, getDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
 import { firestore } from '@/firebaseConfig';
 import { Movie } from '@/app/model/Movie';
 
@@ -140,5 +140,40 @@ export const updateMovieStatus = async (movieId: string, newStatus: string): Pro
         console.log(`Movie status updated successfully to ${newStatus}`);
     } catch (error) {
         throw new Error(`Failed to update movie status: ${error.message}`);
+    }
+};
+
+export const getMoviesByStatus = async (status: string): Promise<Movie[]> => {
+    try {
+        const movieCollection = collection(firestore, 'movies');
+
+        // Tạo query để lấy các phim với trạng thái cụ thể
+        const statusQuery = query(movieCollection, where('Status', '==', status));
+        const movieSnapshot = await getDocs(statusQuery);
+
+        const movies: Movie[] = movieSnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                FilmTypeID: data.FilmTypeID || [],
+                Name: data.Name,
+                Duration: data.Duration,
+                Rating: data.Rating,
+                Poster: data.Poster,
+                Trailer: data.Trailer,
+                Language: data.Language,
+                Status: data.Status,
+                Director: data.Director,
+                ActorID: data.ActorID,
+                ScreeningRoomsID: data.ScreeningRoomsID || [],
+                Introduction: data.Introduction,
+                ReleaseDate: data.ReleaseDate,
+                AgeRating: data.AgeRating,
+            } as Movie;
+        });
+
+        return movies; // Trả về danh sách phim theo trạng thái
+    } catch (error) {
+        throw new Error(`Failed to fetch movies by status: ${error.message}`);
     }
 };

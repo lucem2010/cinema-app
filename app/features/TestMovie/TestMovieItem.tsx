@@ -42,19 +42,19 @@ const MovieItem: React.FC<MovieItemProps> = ({ movie, onEdit, onDelete }) => {
 
     const handleSave = () => {
         if (!selectedScreeningRoom) {
-            alert('Please select both a screening room and a time slot.');
+            alert('Trùng lịch');
             return;
         }
-    
+
         // Check if the movie status is "Sắp chiếu"
         if (movie.Status === 'Sắp chiếu') {
             dispatch(updateMovieStatusById({ movieId: movie.id, newStatus: 'Đang Chiếu' }));
         }
-    
+
         console.log('Selected Screening Room:', selectedScreeningRoom);
         closeModal();
     };
-    
+
 
     return (
         <View style={styles.container}>

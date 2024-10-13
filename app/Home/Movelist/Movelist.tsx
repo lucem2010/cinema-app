@@ -1,28 +1,17 @@
 import { StyleSheet, View, Image, Dimensions, TouchableOpacity } from 'react-native';
 import React, { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Animated } from 'react-native';
-import { fetchMovies } from '@/app/features/TestMovie/TestMovieSlice';
-import { RootState } from '@/store/store';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
+
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.6; // Width of the centered item
 const ITEM_SPACING = (width - ITEM_WIDTH) / 2; // Spacing between items
 
-const Movelist = () => {
+const MovieListHome = ({movies} ) => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef(null);
-  const dispatch = useDispatch();
-  const navigation = useNavigation();  // Get navigation instance
-
-  // Access the movies from Redux state
-  const { movies, status, error } = useSelector((state: RootState) => state.movie);
-
-  // Fetch movies on component mount
-  useEffect(() => {
-    dispatch(fetchMovies());
-  }, [dispatch]);
+  const navigation = useNavigation(); // Get navigation instance
 
   // Add looping for the FlatList (handle empty data safely)
   const dataWithLoop = movies.length > 0
@@ -66,17 +55,14 @@ const Movelist = () => {
       outputRange: [0.6, 1, 0.6],
     });
 
-    // Handle item click
     const handlePress = () => {
-      navigation.navigate('MovieDetails', { movie: item });  // Pass the movie object
+      navigation.navigate('MovieDetails', { movie: item });
     };
 
     return (
       <View style={{ width: ITEM_WIDTH }}>
         <TouchableOpacity onPress={handlePress}>
-          <Animated.View
-            style={[styles.imageContainer, { transform: [{ scale }], opacity }]}
-          >
+          <Animated.View style={[styles.imageContainer, { transform: [{ scale }], opacity }]}>
             <Image source={{ uri: item?.Poster }} style={styles.image} />
           </Animated.View>
         </TouchableOpacity>
@@ -84,7 +70,6 @@ const Movelist = () => {
     );
   };
 
-  // Method to get item layout
   const getItemLayout = (data, index) => ({
     length: ITEM_WIDTH,
     offset: ITEM_WIDTH * index,
@@ -93,7 +78,7 @@ const Movelist = () => {
 
   return (
     <View style={styles.container}>
-      {movies.length > 0 ? (  // Render list only if data is available
+      {movies.length > 0 ? (
         <Animated.FlatList
           ref={flatListRef}
           data={dataWithLoop}
@@ -113,15 +98,14 @@ const Movelist = () => {
           renderItem={renderItem}
         />
       ) : (
-        <View>
-        
-        </View>
+        <View />
       )}
     </View>
   );
 };
 
-export default Movelist;
+
+export default MovieListHome;
 
 const styles = StyleSheet.create({
   container: {
